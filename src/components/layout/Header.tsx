@@ -32,7 +32,7 @@ export function Header() {
       });
 
       return () => {
-        authListener.subscription.unsubscribe();
+        authListener?.subscription?.unsubscribe();
       };
     } catch {
       // Offline fallback
