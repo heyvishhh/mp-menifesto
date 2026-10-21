@@ -81,6 +81,23 @@ export async function POST(request: NextRequest) {
         appliedCount = insertedCount + updatedCount;
       }
 
+      // 5. Store original workbook in Supabase Storage
+      try {
+        const { createAdminClient } = await import('@/lib/supabase/admin').catch(() => ({ createAdminClient: null }));
+        if (createAdminClient) {
+          const adminClient = createAdminClient();
+          const storageFilename = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+          await adminClient.storage
+            .from('manifesto-workbooks')
+            .upload(storageFilename, buffer, {
+              contentType: file.type || 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+              upsert: true,
+            });
+        }
+      } catch (storageErr) {
+        console.warn('Storage archival notice:', storageErr);
+      }
+
       // Record in import audit history
       await importRepository.recordImport({
         filename: file.name,

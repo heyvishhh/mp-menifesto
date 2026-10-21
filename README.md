@@ -55,56 +55,33 @@ Built with **Next.js 16 (Turbopack)**, **React 19**, **TypeScript 5**, **Tailwin
 
 ---
 
-## ⚠️ Development Persistence Limitations
+## 🌟 Stage 3 Production Architecture & Features
 
-> [!IMPORTANT]
-> **Current Persistence Mode: In-Memory Development Repository (`DevPromiseRepository`)**
-> 
-> In **Stage 2**, the application persists changes, new records, edits, and Excel imports in runtime server memory seeded with the complete baseline dataset of **414 manifesto promises** extracted from `data/MP Manifesto Analysis.xlsx`.
-> 
-> **Limitations in Stage 2:**
-> 1. Changes exist in runtime server/browser memory; restarting the Node.js server process will re-initialize records back to the baseline 414 records.
-> 2. Multi-user concurrent writes are not backed by database row locking.
-> 3. Browser sessions that lose connection will reload data from the dev repository.
-> 
-> **Stage 3 Roadmap:**
-> In **Stage 3**, `DevPromiseRepository` will be swapped with `SupabasePromiseRepository` using the existing TypeScript repository interfaces (`IPromiseRepository`), connecting directly to Supabase PostgreSQL with Row Level Security (RLS), real-time WebSockets, and persistent audit log tables. Zero UI code refactoring will be required.
+### 1. Live Supabase PostgreSQL Persistence
+- **414 Manifesto Promises Seeded:** Live PostgreSQL database populated with all 414 promises, 45 departments, 10 categories, and 508 relational department associations.
+- **Transactional Consistency:** Database modifications (`create`, `update`, `delete`, `replaceDataset`, `bulkUpsert`) run within atomic SQL transactions (`BEGIN ... COMMIT`) via direct server connection pooling (`src/lib/supabase/db.ts`).
+- **Optimistic Concurrency Control (OCC):** Prevents silent overwrite conflicts using integer `version` checking. Stale updates return HTTP 409 Conflict.
+- **Live Audit Trail:** All field-level updates, dataset replacements, and deletions are permanently recorded in the `audit_logs` table.
 
----
+### 2. Authentication & Row Level Security (RLS)
+- **Supabase Auth Integration:** Login view (`src/app/(auth)/login/page.tsx`) with state portal styling, session listener in header (`src/components/layout/Header.tsx`), and secure cookie session storage via `@supabase/ssr`.
+- **Role-Based Access Control (RBAC):** `ADMIN`, `EDITOR`, and `VIEWER` roles enforced via database RLS policies (`supabase/migrations/002_stage3_auth_rls.sql`) and Next.js server route handlers.
+- **Zero Secret Leakage:** Database passwords and service role keys are kept strictly on the server; the browser client only uses publishable anonymous keys or delegates mutations to authenticated route handlers (`/api/promises`, `/api/import`).
 
-## 🚀 Quick Start & Local Setup
+### 3. Cloud Storage & Workbook Archival
+- **Supabase Storage Buckets:** Private bucket `manifesto-workbooks` for immutable raw Excel workbook uploads, and `manifesto-exports` for generated reports.
+- **Import History & Versioning:** Tracks import jobs in `workbook_imports` with status, row counts, and diff analysis.
 
-### Prerequisites
-- **Node.js:** v18.0.0 or later (v24 LTS recommended)
-- **npm:** v9.0.0 or later
-
-### Installation
-
-```bash
-# 1. Clone or navigate to the repository
-cd "mp manifesto"
-
-# 2. Install dependencies
-npm install
-
-# 3. Copy environment configuration
-cp .env.example .env.local
-
-# 4. Run tests
-npm test
-
-# 5. Start development server
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+### 4. Vercel Deployment Ready
+- **Vercel Configuration:** `vercel.json` configured with legacy peer dependency resolution and Turbopack builds.
+- **Comprehensive Documentation:** `docs/DEPLOYMENT.md` and `docs/SECURITY.md` cover exact deployment procedures.
 
 ---
 
 ## 🧪 Testing & Verification
 
 ```bash
-# 1. Run Vitest Unit & Integration Test Suite (20 tests)
+# 1. Run Vitest Unit & Integration Test Suite (24 tests including live DB & OCC)
 npm test
 
 # 2. Run TypeScript Strict Type Checking (0 errors)
@@ -125,6 +102,8 @@ npm run build
 mp-manifesto/
 ├── src/
 │   ├── app/
+│   │   ├── (auth)/
+│   │   │   └── login/page.tsx         # Government-themed Supabase Auth Login
 │   │   ├── (dashboard)/
 │   │   │   ├── layout.tsx             # Shared dashboard shell (Sidebar + Header + FilterBar)
 │   │   │   ├── page.tsx               # 1. Executive Overview Dashboard (Charts + KPIs)
@@ -137,21 +116,24 @@ mp-manifesto/
 │   │   │   ├── insights/page.tsx      # 6. Deterministic Key Insights Engine
 │   │   │   └── admin/page.tsx         # 8. 12-Step Excel Import Wizard & Provenance
 │   │   ├── api/
-│   │   │   ├── promises/route.ts      # REST API for query, update, create, delete
+│   │   │   ├── promises/route.ts      # REST API for query, update, create, delete (OCC)
 │   │   │   ├── analytics/route.ts     # Aggregated KPI rollups API
 │   │   │   ├── import/route.ts        # Multi-sheet inspection & Mode A/B import API
 │   │   │   └── export/route.ts        # Styled multi-sheet .xlsx generation API
 │   │   ├── globals.css                # Tailwind theme & Devanagari typography
 │   │   └── layout.tsx                 # Root layout with Noto Sans Devanagari font
 │   ├── components/
-│   │   ├── layout/                    # Sidebar, Header, FilterBar, DevBanner
+│   │   ├── layout/                    # Sidebar, Header (with Auth), FilterBar, DevBanner
 │   │   ├── dashboard/                 # KpiCard, StatusBadge, ImportanceBadge
 │   │   ├── charts/                    # ECharts Donut, Bar, Completion Rankings
 │   │   └── tables/                    # AgPromiseGrid, AddPromiseModal, DeleteConfirmModal
 │   ├── lib/
 │   │   ├── analytics/                 # Metrics, Rollups & Deterministic Insights
 │   │   ├── excel/                     # parser.ts (ExcelJS parsing/diff) & exporter.ts
-│   │   ├── repositories/              # Repository interfaces & DevPromiseRepository
+│   │   ├── repositories/              # Repository interfaces & Supabase/Dev implementations
+│   │   │   ├── supabase/              # Supabase PostgreSQL persistence & OCC
+│   │   │   └── dev/                   # Dev mock fallback
+│   │   ├── supabase/                  # client.ts, server.ts, admin.ts, db.ts (pg pool)
 │   │   ├── validation/                # Zod schemas for promises & import options
 │   │   ├── context/                   # FilterContext for shared dashboard filters
 │   │   └── data/                      # manifesto_data.json (414 extracted records)
@@ -161,21 +143,17 @@ mp-manifesto/
 ├── docs/
 │   ├── WORKBOOK_ANALYSIS.md           # Stage 1 workbook inspection report
 │   ├── ARCHITECTURE.md                # System architecture specification
-│   └── DATA_MODEL.md                  # Database models & PostgreSQL schema
+│   ├── DATA_MODEL.md                  # Database models & PostgreSQL schema
+│   ├── DEPLOYMENT.md                  # Supabase & Vercel deployment walkthrough
+│   └── SECURITY.md                    # RBAC, RLS policies & credential protection
 ├── supabase/
 │   └── migrations/
-│       └── 001_initial_schema.sql     # Stage 3 Supabase PostgreSQL migration
+│       ├── 001_initial_schema.sql     # Initial tables, indexes & schema
+│       └── 002_stage3_auth_rls.sql    # Stage 3 Auth, Profiles, RLS, Storage & OCC
+├── vercel.json                        # Vercel deployment configuration
 └── tests/
     ├── analytics.test.ts              # KPI, rollups, and insight unit tests
-    └── excel_and_repo.test.ts         # Excel parser, duplicate headers, merge/replace & exporter tests
+    ├── excel_and_repo.test.ts         # Excel parser, duplicate headers, merge/replace & exporter tests
+    └── supabase_stage3.test.ts        # Live Supabase DB read, OCC conflict, and audit tests
 ```
 
----
-
-## 🛣️ Roadmap: Next Step (Stage 3)
-
-- **Supabase Cloud Integration:** Implement `SupabasePromiseRepository` implementing `IPromiseRepository`.
-- **Database Persistence:** Execute migration `supabase/migrations/001_initial_schema.sql` on Supabase PostgreSQL.
-- **Row-Level Security (RLS):** Authenticated departmental nodal officer role-based access control.
-- **Audit Logging Table:** Persist all field-level updates to `audit_logs` in PostgreSQL.
-- **Production Deployment:** Configure environment variables and deploy to Vercel.

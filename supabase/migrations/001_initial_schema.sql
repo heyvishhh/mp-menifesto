@@ -3,19 +3,27 @@
 -- Stage 3 Database Migration
 -- ====================================================================
 
--- 1. Create Custom Enumerated Types
-CREATE TYPE promise_status_enum AS ENUM (
-    'COMPLETED',     -- पूर्ण
-    'IN_PROGRESS',   -- प्रगति पर
-    'INITIAL_STAGE', -- प्रारंभिक चरण
-    'NOT_STARTED'    -- प्रारंभ नहीं
-);
+-- 1. Create Custom Enumerated Types (Idempotent)
+DO $$ BEGIN
+    CREATE TYPE promise_status_enum AS ENUM (
+        'COMPLETED',     -- पूर्ण
+        'IN_PROGRESS',   -- प्रगति पर
+        'INITIAL_STAGE', -- प्रारंभिक चरण
+        'NOT_STARTED'    -- प्रारंभ नहीं
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TYPE political_importance_enum AS ENUM (
-    'HIGH',    -- उच्च
-    'MEDIUM',  -- मध्यम
-    'LIMITED'  -- सीमित
-);
+DO $$ BEGIN
+    CREATE TYPE political_importance_enum AS ENUM (
+        'HIGH',    -- उच्च
+        'MEDIUM',  -- मध्यम
+        'LIMITED'  -- सीमित
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- 2. Master Departments Reference Table
 CREATE TABLE IF NOT EXISTS departments (
@@ -114,6 +122,7 @@ BEGIN
 END;
 $$ LANGUAGE 'plpgsql';
 
+DROP TRIGGER IF EXISTS trigger_update_promises_updated_at ON promises;
 CREATE TRIGGER trigger_update_promises_updated_at
 BEFORE UPDATE ON promises
 FOR EACH ROW

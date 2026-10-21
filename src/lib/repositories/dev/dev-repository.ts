@@ -131,10 +131,17 @@ export class DevPromiseRepository implements IPromiseRepository {
     return { ...newPromise };
   }
 
-  async update(id: number, updates: Partial<PromiseRecord>, modifiedBy = 'सिस्टम उपयोगकर्ता'): Promise<PromiseRecord> {
+  async update(id: number, updates: Partial<PromiseRecord>, modifiedBy = 'सिस्टम उपयोगकर्ता', expectedVersion?: number): Promise<PromiseRecord> {
     const idx = memoryPromises.findIndex(p => p.id === id);
     if (idx === -1) {
       throw new Error(`Promise with ID ${id} not found`);
+    }
+
+    if (expectedVersion !== undefined && (memoryPromises[idx] as PromiseRecord & { version?: number }).version !== undefined) {
+      const currentVer = (memoryPromises[idx] as PromiseRecord & { version?: number }).version;
+      if (currentVer !== expectedVersion) {
+        throw new Error(`Conflict: Record #${id} was modified by another user.`);
+      }
     }
 
     const current = memoryPromises[idx];

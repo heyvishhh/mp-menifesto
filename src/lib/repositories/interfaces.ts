@@ -15,7 +15,7 @@ export interface IPromiseRepository {
   getById(id: number): Promise<PromiseRecord | null>;
   query(filters: Partial<DashboardFilters>): Promise<PromiseRecord[]>;
   create(promise: Omit<PromiseRecord, 'id' | 'updatedAt'>, modifiedBy?: string): Promise<PromiseRecord>;
-  update(id: number, updates: Partial<PromiseRecord>, modifiedBy?: string): Promise<PromiseRecord>;
+  update(id: number, updates: Partial<PromiseRecord>, modifiedBy?: string, expectedVersion?: number): Promise<PromiseRecord>;
   delete(id: number, modifiedBy?: string): Promise<boolean>;
   bulkUpsert(promises: PromiseRecord[], modifiedBy?: string): Promise<{ inserted: number; updated: number; unchanged: number }>;
   replaceDataset(promises: PromiseRecord[], modifiedBy?: string): Promise<number>;

@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json();
-    const { id, updates, modifiedBy } = body;
+    const { id, updates, modifiedBy, expectedVersion } = body;
 
     if (!id || typeof id !== 'number') {
       return NextResponse.json(
@@ -92,16 +92,17 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const updated = await promiseRepository.update(id, updates, modifiedBy);
+    const updated = await promiseRepository.update(id, updates, modifiedBy, expectedVersion);
     return NextResponse.json({
       success: true,
       data: updated,
     });
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : 'Update failed';
+    const status = msg.includes('Conflict:') ? 409 : 500;
     return NextResponse.json(
       { success: false, error: msg },
-      { status: 500 }
+      { status }
     );
   }
 }

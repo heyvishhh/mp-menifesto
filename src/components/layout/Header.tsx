@@ -1,9 +1,10 @@
 'use client';
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { Calendar, Download } from 'lucide-react';
 import Link from 'next/link';
+import { createClient } from '@/lib/supabase/client';
+import type { User } from '@supabase/supabase-js';
 
 const pageTitles: Record<string, { hi: string; en: string }> = {
   '/': { hi: 'सिंहावलोकन डैशबोर्ड', en: 'Overview Executive Dashboard' },
@@ -17,6 +18,26 @@ const pageTitles: Record<string, { hi: string; en: string }> = {
 
 export function Header() {
   const pathname = usePathname();
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    try {
+      const supabase = createClient();
+      supabase.auth.getUser().then(({ data }) => {
+        if (data?.user) setUser(data.user);
+      });
+
+      const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+        setUser(session?.user || null);
+      });
+
+      return () => {
+        authListener.subscription.unsubscribe();
+      };
+    } catch {
+      // Offline fallback
+    }
+  }, []);
   
   // Find matching title or handle promise detail view
   let titleInfo = pageTitles[pathname];
@@ -64,13 +85,41 @@ export function Header() {
           </Link>
 
           <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
-            <div className="w-8 h-8 rounded-full bg-teal-800 text-white flex items-center justify-center font-bold text-xs shadow-xs">
-              मप्र
-            </div>
-            <div className="hidden xl:block text-left text-xs">
-              <div className="font-semibold text-slate-800 leading-tight">नोडल अधिकारी</div>
-              <div className="text-[10px] text-slate-400 leading-tight">सीएम डैशबोर्ड सेल</div>
-            </div>
+            {user ? (
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-teal-800 text-white flex items-center justify-center font-bold text-xs shadow-xs">
+                  {user.email ? user.email.slice(0, 2).toUpperCase() : 'मप्र'}
+                </div>
+                <div className="hidden xl:block text-left text-xs">
+                  <div className="font-semibold text-slate-800 leading-tight truncate max-w-[120px]">
+                    {user.email}
+                  </div>
+                  <div className="text-[10px] text-teal-600 font-semibold leading-tight">
+                    प्रशासनिक सत्र (Active)
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const supabase = createClient();
+                    await supabase.auth.signOut();
+                    setUser(null);
+                    window.location.reload();
+                  }}
+                  className="px-2 py-1 text-[11px] rounded bg-slate-100 hover:bg-slate-200 text-slate-600 transition"
+                  title="लॉगआउट"
+                >
+                  लॉगआउट
+                </button>
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium transition"
+              >
+                लॉगिन (Sign In)
+              </Link>
+            )}
           </div>
         </div>
       </div>

@@ -36,6 +36,7 @@ export interface PromiseRecord {
   sourceSheet: string;
   sourceRow: number;
   updatedAt: string;
+  version?: number;
   /** Preserved unknown or extra columns from custom Excel imports */
   unknownFields?: Record<string, unknown>;
 }
