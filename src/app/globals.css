@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --brand-teal-950: #02201d;
+  --brand-teal-900: #042f2e;
+  --brand-teal-800: #115e59;
+  --brand-teal-700: #0f766e;
+  --brand-teal-600: #0d9488;
+  --brand-teal-50: #f0fdfa;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans), var(--font-devanagari), system-ui, sans-serif;
+  --font-devanagari: var(--font-devanagari), 'Mangal', 'Nirmala UI', sans-serif;
+}
+
+body {
+  font-family: var(--font-sans), var(--font-devanagari), sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Devanagari Typography Enhancement */
+.font-devanagari {
+  font-family: var(--font-devanagari), 'Mangal', 'Nirmala UI', sans-serif;
+  line-height: 1.6;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Print Styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
