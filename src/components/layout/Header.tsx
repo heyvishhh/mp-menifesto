@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
 
 const pageTitles: Record<string, { hi: string; en: string }> = {
-  '/': { hi: 'सिंहावलोकन डैशबोर्ड', en: 'Overview Executive Dashboard' },
+  '/': { hi: ' डैशबोर्ड', en: 'Overview Executive Dashboard' },
   '/promises': { hi: 'समस्त घोषणाएँ एवं वादे', en: 'All 414 Manifesto Commitments' },
   '/analysis': { hi: 'गहन सांख्यिकीय विश्लेषण', en: 'In-Depth Analytics & Drilldowns' },
   '/departments': { hi: 'विभाग-वार प्रदर्शन मूल्यांकन', en: 'Department Performance Scorecard' },

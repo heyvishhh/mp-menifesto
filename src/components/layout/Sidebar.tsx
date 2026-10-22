@@ -3,15 +3,15 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { 
-  LayoutDashboard, 
-  Table, 
-  BarChart3, 
-  Building2, 
-  Layers, 
-  Lightbulb, 
-  ShieldCheck, 
-  ChevronLeft, 
+import {
+  LayoutDashboard,
+  Table,
+  BarChart3,
+  Building2,
+  Layers,
+  Lightbulb,
+  ShieldCheck,
+  ChevronLeft,
   ChevronRight,
   Menu,
   X
@@ -19,7 +19,7 @@ import {
 
 const navigationItems = [
   {
-    nameHi: 'सिंहावलोकन',
+    nameHi: 'डैशबोर्ड',
     nameEn: 'Overview Dashboard',
     href: '/',
     icon: LayoutDashboard,
@@ -93,11 +93,9 @@ export function Sidebar() {
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed lg:sticky top-0 left-0 h-screen z-40 flex flex-col bg-[#042f2e] text-slate-100 transition-all duration-300 shadow-xl ${
-          collapsed ? 'w-20' : 'w-68'
-        } ${
-          mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        }`}
+        className={`fixed lg:sticky top-0 left-0 h-screen z-40 flex flex-col bg-[#042f2e] text-slate-100 transition-all duration-300 shadow-xl ${collapsed ? 'w-20' : 'w-68'
+          } ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+          }`}
       >
         {/* Brand / Logo Section */}
         <div className="flex items-center justify-between px-4 py-5 border-b border-teal-800/80">
@@ -108,7 +106,7 @@ export function Sidebar() {
             {!collapsed && (
               <div className="flex flex-col min-w-0">
                 <span className="font-bold text-sm tracking-tight text-white truncate">
-                  मध्य प्रदेश शासन
+                  मध्य प्रदेश संकल्प पत्र
                 </span>
                 <span className="text-[11px] text-teal-300 font-medium truncate">
                   संकल्प पत्र मॉनिटरिंग
@@ -137,11 +135,10 @@ export function Sidebar() {
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
-                className={`group flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all ${
-                  isActive
+                className={`group flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all ${isActive
                     ? 'bg-teal-600 text-white shadow-sm shadow-teal-900/40 font-semibold'
                     : 'text-teal-100/80 hover:bg-teal-800/50 hover:text-white'
-                }`}
+                  }`}
                 title={collapsed ? `${item.nameHi} (${item.nameEn})` : undefined}
               >
                 <Icon className={`w-5 h-5 flex-shrink-0 transition-transform ${isActive ? 'scale-105' : 'group-hover:scale-105'}`} />
@@ -152,9 +149,8 @@ export function Sidebar() {
                       <div className="text-[10px] opacity-70 leading-tight truncate">{item.nameEn}</div>
                     </div>
                     {item.badge && (
-                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${
-                        isActive ? 'bg-teal-800 text-white' : 'bg-teal-900/90 text-teal-200'
-                      }`}>
+                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${isActive ? 'bg-teal-800 text-white' : 'bg-teal-900/90 text-teal-200'
+                        }`}>
                         {item.badge}
                       </span>
                     )}
@@ -169,7 +165,7 @@ export function Sidebar() {
         <div className="p-3 border-t border-teal-800/80">
           {!collapsed ? (
             <div className="bg-teal-950/60 rounded-lg p-2.5 text-[11px] text-teal-200/80 border border-teal-800/50">
-              <div className="font-semibold text-white">संकल्प पत्र 2023–28</div>
+              <div className="font-semibold text-white">संकल्प पत्र 2023</div>
               <div className="text-[10px] text-teal-300">कुल वादे: 414 | पूर्णता: 11.4%</div>
             </div>
           ) : (
