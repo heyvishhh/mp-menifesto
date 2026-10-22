@@ -28,21 +28,50 @@ CREATE TABLE IF NOT EXISTS profiles (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Grant schema and type access to auth admin
+GRANT USAGE ON SCHEMA public TO supabase_auth_admin, anon, authenticated, service_role;
+GRANT USAGE ON TYPE public.user_role_enum TO supabase_auth_admin, anon, authenticated, service_role;
+GRANT ALL ON TABLE public.profiles TO supabase_auth_admin, service_role, postgres;
+
 -- Trigger to create a profile automatically when a user signs up
 CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+    default_role public.user_role_enum := 'VIEWER'::public.user_role_enum;
+    extracted_role public.user_role_enum;
 BEGIN
+    BEGIN
+        IF (NEW.raw_user_meta_data->>'role') IN ('ADMIN', 'EDITOR', 'VIEWER') THEN
+            extracted_role := (NEW.raw_user_meta_data->>'role')::public.user_role_enum;
+        ELSE
+            extracted_role := default_role;
+        END IF;
+    EXCEPTION WHEN OTHERS THEN
+        extracted_role := default_role;
+    END;
+
     INSERT INTO public.profiles (id, email, full_name, role)
     VALUES (
         NEW.id,
-        NEW.email,
-        COALESCE(NEW.raw_user_meta_data->>'full_name', split_part(NEW.email, '@', 1)),
-        COALESCE((NEW.raw_user_meta_data->>'role')::user_role_enum, 'VIEWER'::user_role_enum)
+        COALESCE(NEW.email, ''),
+        COALESCE(NEW.raw_user_meta_data->>'full_name', split_part(COALESCE(NEW.email, ''), '@', 1)),
+        extracted_role
     )
-    ON CONFLICT (id) DO NOTHING;
+    ON CONFLICT (id) DO UPDATE
+    SET 
+        email = EXCLUDED.email,
+        full_name = COALESCE(EXCLUDED.full_name, public.profiles.full_name);
+
+    RETURN NEW;
+EXCEPTION WHEN OTHERS THEN
+    RAISE WARNING 'handle_new_user failed: %', SQLERRM;
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
@@ -94,6 +123,17 @@ DROP POLICY IF EXISTS "Users can view own profile" ON profiles;
 CREATE POLICY "Users can view own profile"
     ON profiles FOR SELECT
     USING (auth.uid() = id OR public.get_current_user_role() = 'ADMIN');
+
+DROP POLICY IF EXISTS "Users can insert own profile" ON profiles;
+CREATE POLICY "Users can insert own profile"
+    ON profiles FOR INSERT
+    WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
+CREATE POLICY "Users can update own profile"
+    ON profiles FOR UPDATE
+    USING (auth.uid() = id OR public.get_current_user_role() = 'ADMIN')
+    WITH CHECK (auth.uid() = id OR public.get_current_user_role() = 'ADMIN');
 
 DROP POLICY IF EXISTS "Admins can view audit logs" ON audit_logs;
 CREATE POLICY "Admins can view audit logs"
