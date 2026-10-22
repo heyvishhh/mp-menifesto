@@ -1,9 +1,10 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { Calendar, Download } from 'lucide-react';
+import { Calendar, Download, Palette } from 'lucide-react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
+import { useTheme } from '@/lib/context/ThemeContext';
 import type { User } from '@supabase/supabase-js';
 
 const pageTitles: Record<string, { hi: string; en: string }> = {
@@ -18,6 +19,7 @@ const pageTitles: Record<string, { hi: string; en: string }> = {
 
 export function Header() {
   const pathname = usePathname();
+  const { openCustomizer, theme } = useTheme();
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
@@ -49,17 +51,24 @@ export function Header() {
     titleInfo = { hi: 'संकल्प पत्र विश्लेषण', en: 'MP Manifesto Analysis' };
   }
 
+  const headerBgClass =
+    theme.headerStyle === 'white'
+      ? 'bg-white border-b border-slate-200'
+      : theme.headerStyle === 'tinted'
+      ? 'bg-[var(--brand-teal-50,#f0fdfa)]/95 backdrop-blur-md border-b border-[var(--brand-teal-200,#99f6e4)]'
+      : 'bg-white/95 backdrop-blur-md border-b border-slate-200/80';
+
   return (
-    <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-4 lg:px-8 py-3.5 transition-all">
+    <header className={`sticky top-0 z-30 px-4 lg:px-8 py-3.5 transition-all ${headerBgClass}`}>
       <div className="flex items-center justify-between gap-4">
         {/* Left: Breadcrumbs & Page Heading */}
         <div className="pl-10 lg:pl-0">
           <div className="flex items-center gap-2 text-[11px] text-slate-500 font-medium">
-            <Link href="/" className="hover:text-teal-700 transition-colors">
+            <Link href="/" className="hover:text-[var(--brand-teal-700,#0f766e)] transition-colors">
               डैशबोर्ड
             </Link>
             <span>/</span>
-            <span className="text-teal-800 font-semibold">{titleInfo.hi}</span>
+            <span className="text-[var(--brand-teal-800,#115e59)] font-semibold">{titleInfo.hi}</span>
           </div>
           <h1 className="text-lg lg:text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
             <span>{titleInfo.hi}</span>
@@ -70,18 +79,33 @@ export function Header() {
         </div>
 
         {/* Right: Actions & User Info */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5 sm:gap-3">
           <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-600">
-            <Calendar className="w-3.5 h-3.5 text-teal-600" />
+            <Calendar className="w-3.5 h-3.5 text-[var(--brand-teal-600,#0d9488)]" />
             <span>समीक्षा चक्र: <b>अक्टूबर 2026</b></span>
           </div>
 
+          {/* Theme Customizer Trigger */}
+          <button
+            type="button"
+            onClick={openCustomizer}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--brand-teal-50,#f0fdfa)] hover:bg-[var(--brand-teal-100,#ccfbf1)] text-[var(--brand-teal-800,#115e59)] border border-[var(--brand-teal-200,#99f6e4)] text-xs font-semibold transition-colors shadow-2xs"
+            title="ग्लोबल थीम कस्टमाइज़ करें (Customize Global Theme)"
+          >
+            <span
+              className="w-2.5 h-2.5 rounded-full border border-white shadow-2xs flex-shrink-0"
+              style={{ backgroundColor: theme.primary }}
+            />
+            <Palette className="w-3.5 h-3.5 text-[var(--brand-teal-600,#0d9488)]" />
+            <span className="hidden md:inline">थीम बदलें</span>
+          </button>
+
           <Link
             href="/admin"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 text-xs font-semibold transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold transition-colors"
           >
-            <Download className="w-3.5 h-3.5" />
-            <span className="hidden md:inline">एक्सेल निर्यात / डेटा</span>
+            <Download className="w-3.5 h-3.5 text-slate-500" />
+            <span className="hidden md:inline">डेटा / निर्यात</span>
           </Link>
 
           <div className="flex items-center gap-2 pl-2 border-l border-slate-200">

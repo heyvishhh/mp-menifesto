@@ -21,10 +21,14 @@ import {
   FileText, 
   Layers, 
   Check, 
-  AlertCircle
+  AlertCircle,
+  Palette,
+  Globe
 } from 'lucide-react';
+import { useTheme } from '@/lib/context/ThemeContext';
 
 export default function AdminDataManagementPage() {
+  const { theme, openCustomizer } = useTheme();
   const [importHistory, setImportHistory] = useState<WorkbookImport[]>([]);
   const [datasetInfo, setDatasetInfo] = useState({
     totalPromises: 0,
@@ -267,6 +271,95 @@ export default function AdminDataManagementPage() {
           </div>
           <div className="text-xs text-slate-500 mt-1">
             समृद्ध किसान, सशक्त नारी, उत्तम शिक्षा इत्यादि
+          </div>
+        </div>
+      </div>
+
+      {/* Global Theme & Branding Management Card */}
+      <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+          <div className="flex items-center gap-2.5">
+            <div
+              className="w-9 h-9 rounded-xl flex items-center justify-center text-white shadow-2xs"
+              style={{ backgroundColor: theme.primary }}
+            >
+              <Palette className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-bold text-slate-900">
+                  वैश्विक थीम एवं ब्रांडिंग (Global Dashboard Theme)
+                </h3>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <Globe className="w-3 h-3" />
+                  Vercel क्लाउड सिंक
+                </span>
+              </div>
+              <p className="text-xs text-slate-500">
+                यहाँ सहेजी गई थीम सीधे PostgreSQL में स्टोर होती है और Vercel डिप्लॉयमेंट पर सभी आगंतुकों (Visitors) के लिए लाइव रहती है।
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={openCustomizer}
+            className="inline-flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold text-white rounded-xl shadow-xs transition-transform active:scale-95"
+            style={{ backgroundColor: theme.primary }}
+          >
+            <Palette className="w-4 h-4" />
+            <span>थीम कस्टमाइज़र खोलें (Customize Theme)</span>
+          </button>
+        </div>
+
+        {/* Current Active Theme Preview Info */}
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+          <div className="p-3 rounded-lg bg-slate-50 border border-slate-200/80">
+            <div className="text-[10px] font-semibold text-slate-500 uppercase">सक्रिय थीम (Active)</div>
+            <div className="text-sm font-bold text-slate-800 mt-0.5">{theme.name}</div>
+            <div className="text-[11px] text-slate-400">{theme.nameEn}</div>
+          </div>
+
+          <div className="p-3 rounded-lg bg-slate-50 border border-slate-200/80 flex flex-col justify-between">
+            <div className="text-[10px] font-semibold text-slate-500 uppercase">रंग पैलेट (Colors)</div>
+            <div className="flex items-center gap-2 mt-1">
+              <span
+                className="w-5 h-5 rounded-md border border-white shadow-2xs"
+                style={{ backgroundColor: theme.primary }}
+                title={`Primary: ${theme.primary}`}
+              />
+              <span
+                className="w-5 h-5 rounded-md border border-white shadow-2xs"
+                style={{ backgroundColor: theme.sidebarBg }}
+                title={`Sidebar: ${theme.sidebarBg}`}
+              />
+              <span
+                className="w-5 h-5 rounded-md border border-white shadow-2xs"
+                style={{ backgroundColor: theme.accent }}
+                title={`Accent: ${theme.accent}`}
+              />
+              <span className="text-xs font-mono font-semibold text-slate-600">
+                {theme.primary}
+              </span>
+            </div>
+          </div>
+
+          <div className="p-3 rounded-lg bg-slate-50 border border-slate-200/80">
+            <div className="text-[10px] font-semibold text-slate-500 uppercase">हेडर व स्टाइल</div>
+            <div className="text-xs font-bold text-slate-800 mt-1 capitalize">
+              {theme.headerStyle} Header | Radius: {theme.borderRadius}
+            </div>
+            <div className="text-[11px] text-slate-400">पृष्ठभूमि: {theme.dashboardBg}</div>
+          </div>
+
+          <div className="p-3 rounded-lg bg-slate-50 border border-slate-200/80">
+            <div className="text-[10px] font-semibold text-slate-500 uppercase">अंतिम अद्यतन (Updated)</div>
+            <div className="text-xs font-bold text-slate-800 mt-1 truncate">
+              {theme.updatedBy || 'प्रशासनिक'}
+            </div>
+            <div className="text-[10px] text-slate-400">
+              {theme.updatedAt ? new Date(theme.updatedAt).toLocaleString('hi-IN') : 'डिफ़ॉल्ट'}
+            </div>
           </div>
         </div>
       </div>

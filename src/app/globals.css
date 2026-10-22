@@ -16,6 +16,17 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans), var(--font-devanagari), system-ui, sans-serif;
   --font-devanagari: var(--font-devanagari), 'Mangal', 'Nirmala UI', sans-serif;
+  --color-teal-50: var(--brand-teal-50, #f0fdfa);
+  --color-teal-100: var(--brand-teal-100, #ccfbf1);
+  --color-teal-200: var(--brand-teal-200, #99f6e4);
+  --color-teal-300: var(--brand-teal-300, #5eead4);
+  --color-teal-400: var(--brand-teal-400, #2dd4bf);
+  --color-teal-500: var(--brand-teal-500, #14b8a6);
+  --color-teal-600: var(--brand-teal-600, #0d9488);
+  --color-teal-700: var(--brand-teal-700, #0f766e);
+  --color-teal-800: var(--brand-teal-800, #115e59);
+  --color-teal-900: var(--brand-teal-900, #042f2e);
+  --color-teal-950: var(--brand-teal-950, #02201d);
 }
 
 body {

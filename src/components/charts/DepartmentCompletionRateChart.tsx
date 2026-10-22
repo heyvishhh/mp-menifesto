@@ -4,6 +4,7 @@ import React, { useMemo } from 'react';
 import * as echarts from 'echarts';
 import { EChartWrapper } from './EChartWrapper';
 import { DepartmentMetrics } from '@/types';
+import { useTheme } from '@/lib/context/ThemeContext';
 
 interface Props {
   data: DepartmentMetrics[];
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export function DepartmentCompletionRateChart({ data, limit = 10, onSelectDepartment }: Props) {
+  const { theme } = useTheme();
   // Filter departments with at least 3 promises to avoid 100% on 1 promise outliers
   const qualified = useMemo(() => {
     return data
@@ -75,7 +77,7 @@ export function DepartmentCompletionRateChart({ data, limit = 10, onSelectDepart
           type: 'bar',
           data: qualified.map(d => d.completionRate),
           itemStyle: {
-            color: '#10b981',
+            color: theme.accent || '#10b981',
             borderRadius: [0, 4, 4, 0],
           },
           label: {

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Noto_Sans_Devanagari, Inter } from "next/font/google";
 import "./globals.css";
+import { ThemeScript } from "@/components/theme/ThemeScript";
 
 const notoSansDevanagari = Noto_Sans_Devanagari({
   variable: "--font-devanagari",
@@ -30,8 +31,12 @@ export default function RootLayout({
     <html
       lang="hi"
       className={`${inter.variable} ${notoSansDevanagari.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col font-sans bg-slate-50/70 text-slate-900 selection:bg-teal-500 selection:text-white">
+      <head>
+        <ThemeScript />
+      </head>
+      <body className="min-h-full flex flex-col font-sans bg-[var(--dashboard-bg,#f8fafc)] text-slate-900 selection:bg-[var(--brand-teal-500,#14b8a6)] selection:text-white transition-colors duration-150">
         {children}
       </body>
     </html>
